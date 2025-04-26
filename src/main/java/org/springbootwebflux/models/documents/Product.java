@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
-@Document(collation = "products")
+@Document(collection = "products")
 public class Product {
     @Id
     private String id;
@@ -13,6 +13,13 @@ public class Product {
     private Double price;
     private Date creation;
 
+    public Product(String name, Double price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    public Product() {
+    }
 
     public String getId() {
         return id;
@@ -44,5 +51,15 @@ public class Product {
 
     public void setCreation(Date creation) {
         this.creation = creation;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", creation=" + creation +
+                '}';
     }
 }
