@@ -2,8 +2,10 @@ package org.springbootwebflux;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springbootwebflux.models.dao.ProductDAO;
+import org.springbootwebflux.models.documents.Category;
 import org.springbootwebflux.models.documents.Product;
+import org.springbootwebflux.models.services.ProductServices;
+import org.springbootwebflux.models.services.ProductServicesImp;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,11 +16,11 @@ import java.util.Date;
 
 @SpringBootApplication
 public class SpringBootWebFluxApplication implements CommandLineRunner {
-    private ProductDAO productDAO;
+    private ProductServices productServicesImp;
     private ReactiveMongoTemplate mongoTemplate;
 
-    public SpringBootWebFluxApplication(ProductDAO productDAO, ReactiveMongoTemplate mongoTemplate) {
-        this.productDAO = productDAO;
+    public SpringBootWebFluxApplication(ProductServicesImp productServicesImp, ReactiveMongoTemplate mongoTemplate) {
+        this.productServicesImp = productServicesImp;
         this.mongoTemplate = mongoTemplate;
     }
 
@@ -32,25 +34,41 @@ public class SpringBootWebFluxApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         mongoTemplate.dropCollection("products").subscribe();
-        Flux.just(
-                        new Product("Nintendo Switch OLED", 349.99),
-                        new Product("The Legend of Zelda: Breath of the Wild", 59.99),
-                        new Product("Super Mario Odyssey", 49.99),
-                        new Product("Mario Kart 8 Deluxe", 59.99),
-                        new Product("Metroid Dread", 59.99),
-                        new Product("Pokémon Scarlet", 59.99),
-                        new Product("Splatoon 3", 59.99),
-                        new Product("Animal Crossing: New Horizons", 49.99),
-                        new Product("Nintendo Switch Pro Controller", 69.99),
-                        new Product("Ring Fit Adventure", 79.99)
+        mongoTemplate.dropCollection("category").subscribe();
+        Category electronic = new Category("Electronic");
+        Category toys = new Category("Toys");
+        Category furniture = new Category("Furniture");
+        Flux.just(electronic, toys, furniture)
+                .flatMap(category -> productServicesImp.saveCategory(category)).doOnNext(category ->
+                        LOGGER.info("Create Category {}", category.getName())
 
-                )
-                .flatMap(product -> {
-                    product.setCreation(new Date());
-                    return productDAO.save(product);
+                ).thenMany(Flux.just(
+                                // Categoría Electronics
+                                new Product("Nintendo Switch OLED", 349.99, electronic),
+                                new Product("PlayStation 5", 499.99, electronic),
+                                new Product("Xbox Series X", 479.99, electronic),
+                                new Product("Steam Deck", 399.99, electronic),
+                                new Product("Gaming PC", 1199.99, electronic),
 
-                })
-                .subscribe(product -> LOGGER.info("Insert : {}", product));
+// Categoría Toys
+                                new Product("LEGO Star Wars Set", 89.99, toys),
+                                new Product("Hot Wheels Mega Track", 59.99, toys),
+                                new Product("NERF Blaster Elite", 49.99, toys),
+                                new Product("Barbie Dreamhouse", 179.99, toys),
+                                new Product("Play-Doh Kitchen Creations", 29.99, toys),
+
+// Categoría Furniture
+                                new Product("Gaming Chair", 229.99, furniture),
+                                new Product("Office Desk", 199.99, furniture),
+                                new Product("Bookshelf Modern", 129.99, furniture),
+                                new Product("TV Stand", 89.99, furniture),
+                                new Product("Bed Frame Queen Size", 499.99, furniture)
+                        )
+                        .flatMap(product -> {
+                            product.setCreation(new Date());
+                            return productServicesImp.save(product);
+
+                        })).subscribe(product -> LOGGER.info("Insert : {}", product));
 
 
     }

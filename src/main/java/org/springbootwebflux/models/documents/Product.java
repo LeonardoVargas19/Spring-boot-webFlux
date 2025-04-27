@@ -19,10 +19,16 @@ public class Product {
     private Double price;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date creation;
+    private Category category;
 
     public Product(String name, Double price) {
         this.name = name;
         this.price = price;
+    }
+
+    public Product(String name, Double price, Category category) {
+        this(name, price);
+        this.category = category;
     }
 
     public Product() {
@@ -60,6 +66,14 @@ public class Product {
         this.creation = creation;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
     @Override
     public String toString() {
         return "Product{" +
@@ -67,6 +81,7 @@ public class Product {
                 ", name='" + name + '\'' +
                 ", price=" + price +
                 ", creation=" + creation +
+                ", category=" + category +
                 '}';
     }
 }

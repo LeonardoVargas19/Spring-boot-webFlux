@@ -98,6 +98,23 @@ public class ProductController {
     }
 
 
+    @GetMapping("delete/{id}")
+    public Mono<String> delete(@PathVariable String id) {
+        return productServices.findById(id)
+                .defaultIfEmpty(new Product())
+                .flatMap(product -> {
+                    if (product == null) {
+                        return Mono.error(new InterruptedException("The product does not exist"));
+
+                    }
+                    return Mono.just(product);
+                })
+                .flatMap(product -> {
+                    LOGGER.info("Product To delete {}", product.getId());
+                    return productServices.delete(product);
+                }).then(Mono.just("redirect:/list?success=product+delete"));
+    }
+
     @GetMapping("/list-data-driver")
     public String listDataDriver(Model model) {
 

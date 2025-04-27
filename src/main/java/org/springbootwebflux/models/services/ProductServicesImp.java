@@ -1,6 +1,8 @@
 package org.springbootwebflux.models.services;
 
+import org.springbootwebflux.models.dao.CategoryDAO;
 import org.springbootwebflux.models.dao.ProductDAO;
+import org.springbootwebflux.models.documents.Category;
 import org.springbootwebflux.models.documents.Product;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -11,9 +13,11 @@ import java.time.Duration;
 @Service
 public class ProductServicesImp implements ProductServices {
     private ProductDAO productDAO;
+    private CategoryDAO categoryDAO;
 
-    public ProductServicesImp(ProductDAO productDAO) {
+    public ProductServicesImp(ProductDAO productDAO, CategoryDAO categoryDAO) {
         this.productDAO = productDAO;
+        this.categoryDAO = categoryDAO;
     }
 
     @Override
@@ -62,5 +66,20 @@ public class ProductServicesImp implements ProductServices {
     @Override
     public Mono<Void> delete(Product product) {
         return productDAO.delete(product);
+    }
+
+    @Override
+    public Flux<Category> findAllCategory() {
+        return categoryDAO.findAll();
+    }
+
+    @Override
+    public Mono<Category> findByIdCategory(String id) {
+        return categoryDAO.findById(id);
+    }
+
+    @Override
+    public Mono<Category> saveCategory(Category category) {
+        return categoryDAO.save(category);
     }
 }
