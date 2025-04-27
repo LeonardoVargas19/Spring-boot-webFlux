@@ -24,12 +24,11 @@ public class ProductRestController {
 
     @GetMapping("/")
     public Flux<Product> index() {
-        Flux<Product> productFlux = productDAO.findAll().map(product -> {
+        return productDAO.findAll().map(product -> {
                     product.setName(product.getName().toUpperCase());
                     return product;
                 }
         ).doOnNext(product -> LOGGER.info(product.getName()));
-        return productFlux;
     }
 
     @GetMapping("/{id}")
@@ -37,10 +36,9 @@ public class ProductRestController {
         //Mono<Product> productFlux = productDAO.findById(id);
         Flux<Product> productFlux = productDAO.findAll();
 
-        Mono<Product> productMono = productFlux.filter(product -> product.getId().equals(id))
+        return productFlux.filter(product -> product.getId().equals(id))
                 .next()
                 .doOnNext(product -> LOGGER.info(product.getName()));
-        return productMono;
     }
 
 }
