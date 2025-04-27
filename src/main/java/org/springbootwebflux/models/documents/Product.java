@@ -2,6 +2,7 @@ package org.springbootwebflux.models.documents;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -11,6 +12,7 @@ public class Product {
     private String id;
     private String name;
     private Double price;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date creation;
 
     public Product(String name, Double price) {

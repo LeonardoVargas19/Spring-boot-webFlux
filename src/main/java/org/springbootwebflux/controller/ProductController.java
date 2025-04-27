@@ -8,10 +8,15 @@ import org.springbootwebflux.models.services.ProductServices;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.thymeleaf.spring6.context.webflux.ReactiveDataDriverContextVariable;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
+
+import static reactor.core.publisher.Flux.just;
 
 @Controller
 public class ProductController {
@@ -25,12 +30,59 @@ public class ProductController {
 
 
     @GetMapping({"/list", "/"})
-    public String lists(Model model) {
+    public Mono<String> lists(Model model) {
         Flux<Product> productFlux = productServices.findAllByToUpperCase();
         productFlux.subscribe(getProductConsumer());
         model.addAttribute("product", productFlux);
         model.addAttribute("title", "List of the products");
-        return "list";
+        return Mono.just("list");
+    }
+
+    @GetMapping("/form")
+    public Mono<String> create(Model model) {
+        model.addAttribute("product", new Product());
+        model.addAttribute("title", "Form of the product");
+        return Mono.just("Form");
+    }
+
+    @PostMapping("/form")
+    public Mono<String> save(Product product) {
+        return productServices.save(product).doOnNext(
+                product1 -> LOGGER.info("Save the product {} ", product1.getId())).thenReturn("redirect:/list");
+    }
+
+
+    @GetMapping("/form/{id}")
+    public Mono<String> edith(@PathVariable String id, Model model) {
+        Mono<Product> productMono = productServices.findById(id).doOnNext(product -> {
+            LOGGER.info("Product : " + product.getName());
+        }).defaultIfEmpty(new Product());
+
+        model.addAttribute("title", "Edith product");
+        model.addAttribute("product", productMono);
+        return Mono.just("form");
+
+    }
+
+    @GetMapping("/formV2/{id}")
+    public Mono<String> edithV2(@PathVariable String id, Model model) {
+
+        return productServices.findById(id).doOnNext(product -> {
+                    LOGGER.info("Product : " + product.getName());
+                    model.addAttribute("title", "Edith product");
+                    model.addAttribute("product", product);
+                }).defaultIfEmpty(new Product())
+                .flatMap(product -> {
+                    if (product == null) {
+                        return Mono.error(new InterruptedException("The product does not exist"));
+
+                    }
+                    return Mono.just(product);
+                })
+                .then(Mono.just("form"))
+                .onErrorResume(ex -> Mono.just("redirect:/list?error=no+exist=product"));
+
+
     }
 
 
