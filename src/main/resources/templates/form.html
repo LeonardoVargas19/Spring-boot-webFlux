@@ -15,11 +15,13 @@
         <div>
             <label for="name">Name</label>
             <div><input type="text" id="name" th:field="*{name}"/></div>
+            <small th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></small>
         </div>
 
         <div>
             <label for="price">Price</label>
             <div><input type="text" id="price" th:field="*{price}"/></div>
+            <small th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></small>
         </div>
 
         <div>

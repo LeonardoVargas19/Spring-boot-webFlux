@@ -7,6 +7,7 @@ import org.springbootwebflux.models.documents.Product;
 import org.springbootwebflux.models.services.ProductServices;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.thymeleaf.spring6.context.webflux.ReactiveDataDriverContextVariable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
 import java.util.function.Consumer;
 
 import static reactor.core.publisher.Flux.just;
@@ -46,15 +48,25 @@ public class ProductController {
     }
 
     @PostMapping("/form")
-    public Mono<String> save(Product product) {
-        return productServices.save(product).doOnNext(
-                product1 -> LOGGER.info("Save the product {} ", product1.getId())).thenReturn("redirect:/list");
+    public Mono<String> save(@Valid Product product, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+
+            model.addAttribute("title", "Errors in the form ");
+            model.addAttribute("button", "guardar");
+            return Mono.just("Form");
+        } else {
+            return productServices.save(product).doOnNext(
+                    product1 -> LOGGER.info("Save the product {} ", product1.getId())).thenReturn("redirect:/list");
+        }
     }
 
 
     @GetMapping("/form/{id}")
     public Mono<String> edith(@PathVariable String id, Model model) {
+
+
         Mono<Product> productMono = productServices.findById(id).doOnNext(product -> {
+
             LOGGER.info("Product : " + product.getName());
         }).defaultIfEmpty(new Product());
 
