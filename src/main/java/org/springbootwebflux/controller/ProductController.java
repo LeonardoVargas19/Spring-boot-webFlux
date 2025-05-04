@@ -3,12 +3,14 @@ package org.springbootwebflux.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springbootwebflux.models.documents.Category;
 import org.springbootwebflux.models.documents.Product;
 import org.springbootwebflux.models.services.ProductServices;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.thymeleaf.spring6.context.webflux.ReactiveDataDriverContextVariable;
@@ -139,6 +141,15 @@ public class ProductController {
     private static Consumer<Product> getProductConsumer() {
         return product -> LOGGER.info("Products {}", product.getName());
     }
+
+
+
+
+    @ModelAttribute("/category")
+    public Flux<Category> categoryFlux(){
+        return productServices.findAllCategory();
+    }
+
 
 
 //    @GetMapping("/list-chunked")

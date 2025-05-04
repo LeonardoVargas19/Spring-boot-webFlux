@@ -16,6 +16,7 @@
         <th>name product</th>
         <th>price</th>
         <th>date</th>
+        <th>category</th>
         <th>edith</th>
         <th>delete</th>
     </tr>
@@ -26,6 +27,7 @@
         <td th:text="${product.name}"></td>
         <td th:text="${product.price}"></td>
         <td th:text="${product.creation}"></td>
+        <td th:text="${product.category.name}"></td>
         <td><a th:href="@{/form/} + ${product.id}">Edith</a></td>
         <td><a th:href="@{/delete/} + ${product.id}">delete</a></td>
     </tr>
